@@ -19,10 +19,18 @@ app.use('/', indexRouter);
 // MySQL database connection configuration
 const pool = mysql.createPool({
     host: 'localhost',
-    user: 'your_mysql_username',
-    password: 'your_mysql_password',
-    database: 'your_database_name',
+    user: 'root',
+    password: 'chrimage1/',
+    database: 'chat_app_db',
+    authSwitchHandler: (data, cb) => {
+        if (data.pluginName === 'mysql_clear_password') {
+            cb(null, Buffer.from('chrimage1/'));
+        }
+    }
 });
+
+
+
 
 // Handle socket.io events
 io.on('connection', (socket) => {
