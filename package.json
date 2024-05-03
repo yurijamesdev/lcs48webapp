@@ -1,0 +1,14 @@
+{
+  "name": "lcs48webapp",
+  "version": "1.0.0",
+  "description": "Project collaboration tool for lcs48",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Yuri",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
