@@ -9,6 +9,12 @@ router.get('/', (req, res) => {
     res.sendFile('home_admin.html', { root: 'views' });
 });
 
+// GET request for the login page
+router.get('/login', (req, res) => {
+    // Render the login.html file from the views directory
+    res.sendFile('login.html', { root: 'views' });
+});
+
 // GET request for the executives my projects
 router.get('/myprojects', (req, res) => {
     // Render the myprojects.html file from the views directory
@@ -25,6 +31,12 @@ router.get('/newproject', (req, res) => {
 router.get('/allprojects', (req, res) => {
     // Render the allprojects.html file from the views directory
     res.sendFile('allprojects.html', { root: 'views' });
+});
+
+// GET request for the executives chat panel
+router.get('/chat', (req, res) => {
+    // Render the chat.html file from the views directory
+    res.sendFile('chat.html', { root: 'views' });
 });
 
 module.exports = router;
