@@ -39,6 +39,12 @@ const authenticateUser = (req, res, next) => {
     }
 };
 
+// Export authenticateUser middleware so it can be used in other files
+module.exports = {
+    app,
+    authenticateUser
+};
+
 // Routes
 const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
