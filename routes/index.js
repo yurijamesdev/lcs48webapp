@@ -21,6 +21,12 @@ router.get('/myprojects', (req, res) => {
     res.sendFile('myprojects.html', { root: 'views' });
 });
 
+// GET request for the executives project
+router.get('/task', (req, res) => {
+    // Render the myprojects.html file from the views directory
+    res.sendFile('incomplete_task.html', { root: 'views' });
+});
+
 // GET request for the executives new project
 router.get('/newproject', (req, res) => {
     // Render the newproject.html file from the views directory
