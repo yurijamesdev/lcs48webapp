@@ -24,17 +24,18 @@
         <div class="wrapper-content">
             
             <div id="new-project-form">
-                <form id="project-form">
-                    <input type="text" placeholder="Project Name" required>
-                    <input type="text" placeholder="Task" required>
-                    <input type="text" placeholder="Expected Date of Completion" required>
-                    <select name="assign-to" id="assign-to" required>
-                        <option value="" disabled selected>Assign To:</option>
-                        <option value="John">John</option>
-                        <option value="Jane">Jane</option>
-                        <option value="Alex">Alex</option>
-                        <!-- Add more options as needed -->
-                    </select>
+                <form id="project-form" method="POST" action="/newproject">
+                    <input type="text" name="project-name" placeholder="Project Name" required>
+                    <input type="text" name="task" placeholder="Task" required>
+                    <input type="date" name="due-date" placeholder="Due Date" required> <!-- Use type="date" for date picker -->
+
+                    <!-- Checkboxes for "Assign To" options -->
+                    Assign To:
+                    <label for="assign-brian"><input type="checkbox" id="assign-brian" name="assign-to[]" value="Brian"> Brian</label>
+                    <label for="assign-konyi"><input type="checkbox" id="assign-konyi" name="assign-to[]" value="Konyi"> Konyi</label>
+                    <label for="assign-max"><input type="checkbox" id="assign-max" name="assign-to[]" value="Max"> Max</label>
+                    <!-- Add more checkboxes as needed -->
+
                     <button id="cp-btn" type="submit">Create Project</button>
                 </form>
             </div>
@@ -44,16 +45,8 @@
         
     </div>
     
-   
-
-
-
-
-
-
-
     <!--Script.js-->
-    <sript src="js/script.js"></sript>
+    <script src="js/script.js"></script>
     
 </body>
 </html>

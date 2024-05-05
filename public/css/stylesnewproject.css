@@ -75,9 +75,11 @@ body {
 
 
 #new-project-form {
-    width: 80%;
+    width: 30%;
     margin-top: 20px;
 }
+
+
 #project-form {
     display: flex;
     flex-direction: column;
@@ -108,5 +110,8 @@ body {
         right: 14px;
         padding: 8px 20px;
         font-size: 16px;
+    }
+    #new-project-form {
+        width: 80%;
     }
 }
