@@ -74,14 +74,12 @@ app.post('/', (req, res) => {
         }
     });
 });
-
-// Route to handle project creation
 app.post('/newproject', (req, res) => {
-    const { projectName, task, dueDate, 'assign-to': assignedUsers } = req.body;
+    const { projectName, task, dueDate, 'assign-to': assignedUser } = req.body;
 
-    // Check if assignedUsers is an array
-    if (!Array.isArray(assignedUsers)) {
-        return res.status(400).json({ message: 'Assigned users must be an array' });
+    // Check if assignedUser is provided
+    if (!assignedUser) {
+        return res.status(400).json({ message: 'Please select a user to assign the project' });
     }
 
     // Assuming the "created_by" is the currently logged-in user, you can get it from the session
@@ -91,27 +89,28 @@ app.post('/newproject', (req, res) => {
     const insertQuery = `INSERT INTO projects (project_name, task, due_date, created_by, assigned_to, created_on) VALUES (?, ?, ?, ?, ?, NOW())`;
 
     // Execute the query with user inputs
-    connection.query(insertQuery, [projectName, task, dueDate, createdBy, assignedUsers.join(', ')], (error, results, fields) => {
+    connection.query(insertQuery, [projectName, task, dueDate, createdBy, assignedUser], (error, results, fields) => {
         if (error) {
             console.error('Error creating project:', error);
-            res.status(500).json({ message: 'Failed to create project' });
+            res.redirect('/newproject')
         } else {
             console.log('Project created successfully'); // Log message to console
-            res.status(200).json({ message: 'Project created successfully' });
+            res.redirect('/myprojects');
         }
     });
 });
 
-// Route to fetch projects data
-app.get('/projects', (req, res) => {
-    const fetchProjectsQuery = `SELECT * FROM projects`;
+// Route to fetch projects data from the database
+app.get('/get_data', (req, res) => {
+
+    const fetchProjectsQuery = 'SELECT * FROM projects ORDER BY created_on DESC'; // Fetch projects in descending order of creation date
 
     connection.query(fetchProjectsQuery, (error, results, fields) => {
         if (error) {
             console.error('Error fetching projects:', error);
             res.status(500).json({ message: 'Failed to fetch projects' });
         } else {
-            res.status(200).json(results);
+            res.json({ projects: results });
         }
     });
 });
@@ -123,3 +122,4 @@ app.use(express.static(path.join(__dirname, 'public')));
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+

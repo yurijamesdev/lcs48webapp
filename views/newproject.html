@@ -25,18 +25,20 @@
             
             <div id="new-project-form">
                 <form id="project-form" method="POST" action="/newproject">
-                    <input type="text" name="project-name" placeholder="Project Name" required>
+                    <input type="text" name="projectName" placeholder="Project Name" required>
                     <input type="text" name="task" placeholder="Task" required>
-                    <input type="date" name="due-date" placeholder="Due Date" required> <!-- Use type="date" for date picker -->
-
-                    <!-- Checkboxes for "Assign To" options -->
+                    Due Date:
+                    <input type="date" name="dueDate" placeholder="Due Date" required>
+                    
+                    <!-- Radio buttons for "Assign To" options -->
                     Assign To:
-                    <label for="assign-brian"><input type="checkbox" id="assign-brian" name="assign-to[]" value="Brian"> Brian</label>
-                    <label for="assign-konyi"><input type="checkbox" id="assign-konyi" name="assign-to[]" value="Konyi"> Konyi</label>
-                    <label for="assign-max"><input type="checkbox" id="assign-max" name="assign-to[]" value="Max"> Max</label>
-                    <!-- Add more checkboxes as needed -->
-
+                    <label for="assign-brian"><input type="radio" id="assign-brian" name="assign-to" value="Brian"> Brian</label>
+                    <label for="assign-konyi"><input type="radio" id="assign-konyi" name="assign-to" value="Konyi"> Konyi</label>
+                    <label for="assign-max"><input type="radio" id="assign-max" name="assign-to" value="Max"> Max</label>
+                    <!-- Add more radio buttons as needed -->
+                    
                     <button id="cp-btn" type="submit">Create Project</button>
+                       
                 </form>
             </div>
                 

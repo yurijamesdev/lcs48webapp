@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const allProjectsButton = document.getElementById('allprojectsbtn');
     const newProjectBtn = document.getElementById('newprojectbtn');
     const logOutButton = document.querySelector('.logout-btn');
+    
+
+
 
     console.log('myProjectsButton:', myProjectsButton);
     console.log('chatRoomButton:', chatRoomButton);
@@ -46,75 +49,37 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/';
         });
     }
+   ;
 
-    // Project form
-    const projectForm = document.getElementById('project-form');
+   const results_body = document.querySelector('#results');
 
-    console.log('projectForm:', projectForm);
+        load_data();
 
-    if (projectForm) {
-        projectForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+        function load_data() {
+            const request = new XMLHttpRequest()
 
-            // Get form data
-            const projectName = projectForm.elements['project-name'].value;
-            const task = projectForm.elements['task'].value;
-            const dueDate = projectForm.elements['due-date'].value;
+            request.open('get', '/get_data');
+            let html = '';
 
-            // Get selected checkboxes for assigned users
-            const assignedUsers = [];
-            const checkboxes = document.querySelectorAll('input[name="assign-to[]"]:checked');
-            checkboxes.forEach(checkbox => {
-                assignedUsers.push(checkbox.value);
-            });
+            request.onreadystatechange = () => {
+                if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
+                    const results = JSON.parse(request.responseText);
+                    results.projects.forEach(result => {
+                        html += `
+                        <tr>
+                            <td>${result.project_name}</td>
+                            <td>${result.created_on}</td>
+                            <td>${result.created_by}</td>
+                            <td>${result.assigned_to}</td>
+                            <td>${result.due_date}</td>
+                            
+                        </tr>
+                        `;
+                    });
 
-            // Prepare data to send to server
-            const projectData = {
-                projectName,
-                task,
-                dueDate,
-                assignedUsers
+                    results_body.innerHTML = html;
+                }
             };
-
-            // Send data to server via fetch API
-            fetch('/newproject', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(projectData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(' ')
-                // Redirect to all projects page
-                window.location.href = '/myprojects';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    }
-
-    const projectTable = document.querySelector('table');
-
-    // Fetch projects data from backend
-    fetch('/projects')
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(project => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${project.project_name}</td>
-                    <td>${project.created_on}</td>
-                    <td>${project.created_by}</td>
-                    <td>${project.assigned_to}</td>
-                    <td>${project.due_date}</td>
-                `;
-                projectTable.appendChild(row);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching projects:', error);
-        });
+            request.send();
+        }
 });
