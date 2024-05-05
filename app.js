@@ -102,10 +102,10 @@ app.post('/newproject', (req, res) => {
 
 // Route to fetch projects data from the database
 app.get('/get_data', (req, res) => {
+    const username = req.session.username; // Get the username from the session
+    const fetchProjectsQuery = 'SELECT * FROM projects WHERE created_by = ? ORDER BY created_on DESC'; // Fetch projects by the logged-in user
 
-    const fetchProjectsQuery = 'SELECT * FROM projects ORDER BY created_on DESC'; // Fetch projects in descending order of creation date
-
-    connection.query(fetchProjectsQuery, (error, results, fields) => {
+    connection.query(fetchProjectsQuery, [username], (error, results, fields) => {
         if (error) {
             console.error('Error fetching projects:', error);
             res.status(500).json({ message: 'Failed to fetch projects' });
@@ -114,6 +114,21 @@ app.get('/get_data', (req, res) => {
         }
     });
 });
+
+// Route to fetch all projects data from the database
+app.get('/get_all_projects', (req, res) => {
+    const fetchAllProjectsQuery = 'SELECT * FROM projects ORDER BY due_date ASC';
+
+    connection.query(fetchAllProjectsQuery, (error, results, fields) => {
+        if (error) {
+            console.error('Error fetching all projects:', error);
+            res.status(500).json({ message: 'Failed to fetch projects' });
+        } else {
+            res.json({ projects: results });
+        }
+    });
+});
+
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));

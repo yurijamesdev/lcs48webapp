@@ -82,4 +82,36 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             request.send();
         }
+        const projectsList = document.getElementById('projectsList');
+
+        // Fetch projects data from the server
+        const request = new XMLHttpRequest();
+        request.open('GET', '/get_all_projects');
+        request.onreadystatechange = function() {
+            if (request.readyState === XMLHttpRequest.DONE) {
+                if (request.status === 200) {
+                    const response = JSON.parse(request.responseText);
+                    const projects = response.projects;
+    
+                    // Loop through the projects and create table rows
+                    projects.forEach(project => {
+                        const createdOnDate = new Date(project.created_on).toLocaleDateString();
+                        const dueDate = new Date(project.due_date).toLocaleDateString();
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${project.project_name}</td>
+                            <td>${project.created_on}</td>
+                            <td>${project.created_by}</td>
+                            <td>${project.assigned_to}</td>
+                            <td>${project.due_date}</td>
+                        `;
+                        projectsList.appendChild(row);
+                    });
+                } else {
+                    console.error('Error fetching projects:', request.statusText);
+                }
+            }
+        };
+        request.send();
 });
