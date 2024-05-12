@@ -4,42 +4,14 @@ const path = require('path');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const socketIO = require('socket.io');
 
-
-
-const app = express()
-const PORT = process.env.PORT || 4000
-const server = app.listen(PORT, () => console.log(`💬 server on port ${PORT}`))
-
-const io = require('socket.io')(server)
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
 
 // Serve static files
-app.use(express.static(path.join(__dirname, 'public')))
-
-let socketsConected = new Set()
-
-io.on('connection', onConnected)
-
-function onConnected(socket) {
-  console.log('Socket connected', socket.id)
-  socketsConected.add(socket.id)
-  io.emit('clients-total', socketsConected.size)
-
-  socket.on('disconnect', () => {
-    console.log('Socket disconnected', socket.id)
-    socketsConected.delete(socket.id)
-    io.emit('clients-total', socketsConected.size)
-  })
-
-  socket.on('message', (data) => {
-    // console.log(data)
-    socket.broadcast.emit('chat-message', data)
-  })
-
-  socket.on('feedback', (data) => {
-    socket.broadcast.emit('feedback', data)
-  })
-}
+app.use(express.static(path.join(__dirname, 'public')));
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -55,10 +27,6 @@ connection.connect((err) => {
     }
     console.log('Connected to MySQL database');
 });
-
-
-
-const port = process.env.PORT || 3000;
 
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -106,6 +74,8 @@ app.post('/', (req, res) => {
         }
     });
 });
+
+// Route to handle creating a new project
 app.post('/newproject', (req, res) => {
     const { projectName, task, dueDate, 'assign-to': assignedUser } = req.body;
 
@@ -124,7 +94,7 @@ app.post('/newproject', (req, res) => {
     connection.query(insertQuery, [projectName, task, dueDate, createdBy, assignedUser], (error, results, fields) => {
         if (error) {
             console.error('Error creating project:', error);
-            res.redirect('/newproject')
+            res.redirect('/newproject');
         } else {
             console.log('Project created successfully'); // Log message to console
             res.redirect('/myprojects');
@@ -161,7 +131,72 @@ app.get('/get_all_projects', (req, res) => {
     });
 });
 
+// Route to serve the HTML template with username variable
+app.get('/script-data', (req, res) => {
+    res.send(`var username = '${req.session.username}';`); // Send the username as a global JavaScript variable
+});
+
+let socketsConected = new Set()
+
+io.on('connection', onConnected)
+
+function onConnected(socket) {
+  console.log('Socket connected', socket.id)
+  socketsConected.add(socket.id)
+  io.emit('clients-total', socketsConected.size)
+
+  socket.on('disconnect', () => {
+    console.log('Socket disconnected', socket.id)
+    socketsConected.delete(socket.id)
+    io.emit('clients-total', socketsConected.size)
+  })
+
+ // Inside your socket.io connection event
+socket.on('message', (data) => {
+    const { sender, message } = data;
+
+    // Store the message in the database
+    connection.query('INSERT INTO messages (sender, message) VALUES (?, ?)', [sender, message], (error, results, fields) => {
+        if (error) {
+            console.error('Error storing message:', error);
+        } else {
+            console.log('Message stored successfully');
+        }
+    });
+
+    // Broadcast the message to other clients
+    socket.broadcast.emit('chat-message', data);
+});
 
 
 
 
+// Route to fetch old messages
+app.get('/oldmessages', authenticateUser, (req, res) => {
+    connection.query('SELECT * FROM messages ORDER BY timestamp ASC', (error, results, fields) => {
+        if (error) {
+            console.error('Error fetching messages:', error);
+            res.status(500).json({ message: 'Failed to fetch messages' });
+        } else {
+            const messages = results.map(message => ({
+                name: message.sender === req.session.username ? 'You' : message.sender,
+                message: message.message,
+                dateTime: message.timestamp, // Adjust the property name based on your database schema
+            }));
+            res.json({ messages });
+        }
+    });
+});
+
+
+
+  socket.on('feedback', (data) => {
+    socket.broadcast.emit('feedback', data)
+  })
+}
+
+// Start the server
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => {
+    console.log(`💬 Server is running on port ${PORT}`);
+});
