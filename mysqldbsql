@@ -6,7 +6,7 @@ CREATE TABLE messages (
 );
 
 -- Create the users table
-CREATE TABLE loginuser (
+CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     user_name VARCHAR(255) UNIQUE NOT NULL,
     uer_pass VARCHAR(255) NOT NULL
@@ -16,6 +16,8 @@ CREATE TABLE loginuser (
 CREATE TABLE projects (
     project_id INT AUTO_INCREMENT PRIMARY KEY,
     project_name VARCHAR(255) NOT NULL,
+    due_date DATE NOT NULL;
+    task VARCHAR(255) NOT NULL;
     created_by INT,
     assigned_to INT,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

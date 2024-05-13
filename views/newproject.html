@@ -24,7 +24,7 @@
         <div class="wrapper-content">
             
             <div id="new-project-form">
-                <form id="project-form" method="POST" action="/newproject">
+                <form id="project-form" enctype="multipart/form-data" method="POST" action="/newproject">
                     <input type="text" name="projectName" placeholder="Project Name" required>
                     <input type="text" name="task" placeholder="Task" required>
                     Due Date:
@@ -36,6 +36,28 @@
                     <label for="assign-konyi"><input type="radio" id="assign-konyi" name="assign-to" value="Konyi"> Konyi</label>
                     <label for="assign-max"><input type="radio" id="assign-max" name="assign-to" value="Max"> Max</label>
                     <!-- Add more radio buttons as needed -->
+
+                    <!-- File upload for task attachment -->
+                    <input type="file" name="attachment" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" multiple>
+
+                    <!-- Sub-project section -->
+                    <div id="sub-project-sections">
+                        <div class="sub-project-section" style="display: none;">
+                            <label for="sub-project-name">Sub Project Name:</label>
+                            <input type="text" name="subProjectName[]" class="sub-project-name">
+                            <input type="text" name="subTask[]" placeholder="Sub Task">
+                            Sub Task Due Date:
+                            <input type="date" name="subDueDate[]" placeholder="Sub Task Due Date">
+                            Assign Sub Task To:
+                            <label for="sub-assign-brian"><input type="radio" id="sub-assign-brian" name="subAssignTo[]" value="Brian"> Brian</label>
+                            <label for="sub-assign-konyi"><input type="radio" id="sub-assign-konyi" name="subAssignTo[]" value="Konyi"> Konyi</label>
+                            <label for="sub-assign-max"><input type="radio" id="sub-assign-max" name="subAssignTo[]" value="Max"> Max</label>
+                            <!-- Add more radio buttons as needed -->
+                        </div>
+                    </div>
+
+                    <!-- Button to add sub-project -->
+                    <button id="add-sub-project-btn" type="button">Add Sub Project</button>
                     
                     <button id="cp-btn" type="submit">Create Project</button>
                        
@@ -48,7 +70,7 @@
     </div>
     
     <!--Script.js-->
-    <script src="js/script.js"></script>
+    <script src="js/newproject.js"></script>
     
 </body>
 </html>

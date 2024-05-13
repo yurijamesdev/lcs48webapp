@@ -62,7 +62,7 @@ app.use('/', indexRouter);
 app.post('/', (req, res) => {
     const { username, password } = req.body;
 
-    connection.query("SELECT * FROM loginuser WHERE user_name = ? AND user_pass = ?", [username, password], (error, results, fields) => {
+    connection.query("SELECT * FROM users WHERE user_name = ? AND uer_pass = ?", [username, password], (error, results, fields) => {
         if (error) throw error;
 
         if (results.length > 0) {
@@ -75,32 +75,53 @@ app.post('/', (req, res) => {
     });
 });
 
-// Route to handle creating a new project
 app.post('/newproject', (req, res) => {
-    const { projectName, task, dueDate, 'assign-to': assignedUser } = req.body;
+    const { projectName, task, dueDate, 'assign-to': assignedUser, subProjectName, subTask, subDueDate, subAssignTo } = req.body;
 
-    // Check if assignedUser is provided
-    if (!assignedUser) {
-        return res.status(400).json({ message: 'Please select a user to assign the project' });
+    // Debugging: Log the received data
+    console.log('Received Form Data:', req.body);
+
+    if (!projectName) {
+        return res.status(400).json({ message: 'Project name is required' });
     }
 
     // Assuming the "created_by" is the currently logged-in user, you can get it from the session
     const createdBy = req.session.username; // Update this based on your session implementation
 
     // Example SQL query to insert project into database with creation timestamp
-    const insertQuery = `INSERT INTO projects (project_name, task, due_date, created_by, assigned_to, created_on) VALUES (?, ?, ?, ?, ?, NOW())`;
+    const insertProjectQuery = `INSERT INTO projects (project_name, task, due_date, created_by, assigned_to, created_on) VALUES (?, ?, ?, ?, ?, NOW())`;
 
-    // Execute the query with user inputs
-    connection.query(insertQuery, [projectName, task, dueDate, createdBy, assignedUser], (error, results, fields) => {
+    // Execute the query to insert the main project
+    connection.query(insertProjectQuery, [projectName, task, dueDate, createdBy, assignedUser], (error, projectResults, fields) => {
         if (error) {
-            console.error('Error creating project:', error);
-            res.redirect('/newproject');
+            console.error('Error creating main project:', error);
+            res.status(500).json({ message: 'Failed to create project' });
         } else {
-            console.log('Project created successfully'); // Log message to console
+            const projectId = projectResults.insertId; // Get the ID of the newly inserted project
+
+            // Loop through the sub-projects data and insert them into the database
+            subProjectName.forEach((subProject, index) => {
+                const subTaskValue = subTask[index];
+                const subDueDateValue = subDueDate[index];
+                const subAssignToValue = subAssignTo[index];
+
+                const insertSubProjectQuery = `INSERT INTO sub_projects (project_id, sub_project_name, sub_task, sub_due_date, sub_assignee) VALUES (?, ?, ?, ?, ?)`;
+
+                // Execute the query to insert sub-projects
+                connection.query(insertSubProjectQuery, [projectId, subProject, subTaskValue, subDueDateValue, subAssignToValue], (subError, subResults, subFields) => {
+                    if (subError) {
+                        console.error('Error creating sub-project:', subError);
+                        res.status(500).json({ message: 'Failed to create sub-project' });
+                    }
+                });
+            });
+
+            console.log('Project and sub-projects created successfully');
             res.redirect('/myprojects');
         }
     });
 });
+
 
 // Route to fetch projects data from the database
 app.get('/get_data', (req, res) => {
