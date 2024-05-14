@@ -17,7 +17,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'chrimage1/',
-    database: 'lcs48',
+    database: 'project_manager',
 });
 
 connection.connect((err) => {
@@ -62,7 +62,7 @@ app.use('/', indexRouter);
 app.post('/', (req, res) => {
     const { username, password } = req.body;
 
-    connection.query("SELECT * FROM users WHERE user_name = ? AND uer_pass = ?", [username, password], (error, results, fields) => {
+    connection.query("SELECT * FROM users WHERE user_name = ? AND user_pass = ?", [username, password], (error, results, fields) => {
         if (error) throw error;
 
         if (results.length > 0) {
@@ -105,7 +105,7 @@ app.post('/newproject', (req, res) => {
                 const subDueDateValue = subDueDate[index];
                 const subAssignToValue = subAssignTo[index];
 
-                const insertSubProjectQuery = `INSERT INTO sub_projects (project_id, sub_project_name, sub_task, sub_due_date, sub_assignee) VALUES (?, ?, ?, ?, ?)`;
+                const insertSubProjectQuery = `INSERT INTO sub_projects (project_id, sub_project_name, sub_task, sub_due_date) VALUES (?, ?, ?, ?)`;
 
                 // Execute the query to insert sub-projects
                 connection.query(insertSubProjectQuery, [projectId, subProject, subTaskValue, subDueDateValue, subAssignToValue], (subError, subResults, subFields) => {
