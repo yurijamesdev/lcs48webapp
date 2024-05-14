@@ -5,6 +5,7 @@ const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const socketIO = require('socket.io');
+const multer = require('multer');
 
 const app = express();
 const server = http.createServer(app);
@@ -75,11 +76,29 @@ app.post('/', (req, res) => {
     });
 });
 
-app.post('/newproject', (req, res) => {
-    const { projectName, task, dueDate, 'assign-to': assignedUser, subProjectName, subTask, subDueDate, subAssignTo } = req.body;
+// Multer configuration
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 1024 * 1024 * 10} // Limit file size to 10MB
+});
+
+
+// Handle form submission with file upload
+app.post('/newproject', upload.single('attachment'), (req, res) => {
+    const { projectName, task, dueDate, 'assign-to': assignedUser, subProjectName, subTask, subDueDate, subAssign } = req.body;
 
     // Debugging: Log the received data
     console.log('Received Form Data:', req.body);
+    console.log('Received File:', req.file);
 
     if (!projectName) {
         return res.status(400).json({ message: 'Project name is required' });
@@ -99,14 +118,24 @@ app.post('/newproject', (req, res) => {
         } else {
             const projectId = projectResults.insertId; // Get the ID of the newly inserted project
 
+            // Handle file upload
+            if (req.file) {
+                const attachmentQuery = `INSERT INTO attachments (project_id, file_name, file_path) VALUES (?, ?, ?)`;
+                connection.query(attachmentQuery, [projectId, req.file.filename, req.file.path], (attachmentError, attachmentResults, attachmentFields) => {
+                    if (attachmentError) {
+                        console.error('Error inserting attachment:', attachmentError);
+                        res.status(500).json({ message: 'Failed to store attachment' });
+                    }
+                });
+            }
+
             // Loop through the sub-projects data and insert them into the database
             subProjectName.forEach((subProject, index) => {
                 const subTaskValue = subTask[index];
                 const subDueDateValue = subDueDate[index];
-                const subAssignToValue = subAssignTo[index];
+                const subAssignToValue = subAssign[index]; // Use subAssign instead of subAssignTo
 
-                const insertSubProjectQuery = `INSERT INTO sub_projects (project_id, sub_project_name, sub_task, sub_due_date) VALUES (?, ?, ?, ?)`;
-
+                const insertSubProjectQuery = `INSERT INTO sub_projects (project_id, sub_project_name, sub_task, sub_due_date, sub_assignee) VALUES (?, ?, ?, ?, ?)`;
                 // Execute the query to insert sub-projects
                 connection.query(insertSubProjectQuery, [projectId, subProject, subTaskValue, subDueDateValue, subAssignToValue], (subError, subResults, subFields) => {
                     if (subError) {

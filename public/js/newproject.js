@@ -1,3 +1,4 @@
+// app.js
 document.addEventListener('DOMContentLoaded', function() {
     const addSubProjectBtn = document.getElementById('add-sub-project-btn');
     const subProjectSections = document.getElementById('sub-project-sections');
@@ -7,16 +8,15 @@ document.addEventListener('DOMContentLoaded', function() {
         subProjectSection.classList.add('sub-project-section');
         subProjectSection.innerHTML = `
             <label for="sub-project-name">Sub Project Name:</label>
-            <input type="text" name="subProjectName" class="sub-project-name">
+            <input type="text" name="subProjectName[]" class="sub-project-name">
             <label for="sub-task">Sub Task:</label>
-            <input type="text" name="subTask" placeholder="Sub Task">
+            <input type="text" name="subTask[]" placeholder="Sub Task">
             <label for="sub-due-date">Sub Task Due Date:</label>
-            <input type="date" name="subDueDate" placeholder="Sub Task Due Date">
+            <input type="date" name="subDueDate[]" placeholder="Sub Task Due Date">
             <label>Assign Sub Task To:</label>
-            <label for="sub-assign-brian"><input type="radio" id="sub-assign-brian" name="subAssign" value="Brian"> Brian</label>
-            <label for="sub-assign-konyi"><input type="radio" id="sub-assign-konyi" name="subAssign" value="Konyi"> Konyi</label>
-            <label for="sub-assign-max"><input type="radio" id="sub-assign-max" name="subAssign" value="Max"> Max</label>
-            <!-- Add more radio buttons as needed -->
+            <label for="sub-assign-brian"><input type="radio" id="sub-assign-brian" name="subAssign[]" value="Brian"> Brian</label>
+            <label for="sub-assign-konyi"><input type="radio" id="sub-assign-konyi" name="subAssign[]" value="Konyi"> Konyi</label>
+            <label for="sub-assign-max"><input type="radio" id="sub-assign-max" name="subAssign[]" value="Max"> Max</label>
         `;
         subProjectSections.appendChild(subProjectSection);
     });
@@ -86,6 +86,14 @@ function getFormData(form) {
             // For non-subtask and non-assign-to inputs, add them directly to formData
             formData[input.name] = input.value;
         }
+    });
+
+    // Convert date strings to YYYY-MM-DD format
+    formData['dueDate'] = new Date(formData['dueDate']).toISOString().split('T')[0];
+
+    // Loop through sub project due dates and convert them
+    formData['subDueDate'].forEach((date, index) => {
+        formData['subDueDate'][index] = new Date(date).toISOString().split('T')[0];
     });
 
     return formData;
